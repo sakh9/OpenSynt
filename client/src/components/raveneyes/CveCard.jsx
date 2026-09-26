@@ -2,69 +2,40 @@ import { ExternalLink } from 'lucide-react';
 import { buildCveSummary } from '../../utils/cveRiskSummary';
 
 const SEVERITY_STYLE = {
-  CRITICAL: 'bg-red-900/30 text-red-400 border-red-800',
-  HIGH: 'bg-orange-900/30 text-orange-400 border-orange-800',
-  MEDIUM: 'bg-amber-900/30 text-amber-400 border-amber-800',
-  LOW: 'bg-emerald-900/30 text-emerald-400 border-emerald-800',
-  UNKNOWN: 'bg-slate-800 text-slate-400 border-slate-700',
+  CRITICAL: 'border-rose-800/70 bg-rose-950/40 text-rose-300',
+  HIGH: 'border-orange-800/70 bg-orange-950/40 text-orange-300',
+  MEDIUM: 'border-amber-800/70 bg-amber-950/40 text-amber-300',
+  LOW: 'border-emerald-800/70 bg-emerald-950/40 text-emerald-300',
+  UNKNOWN: 'border-slate-700 bg-slate-800/60 text-slate-300',
 };
-
 const SUMMARY_STYLE = {
-  danger: 'bg-red-900/20 border-red-900 text-red-300',
-  warn: 'bg-amber-900/20 border-amber-900 text-amber-300',
-  good: 'bg-emerald-900/20 border-emerald-900 text-emerald-300',
-  info: 'bg-slate-800/50 border-slate-700 text-slate-300',
+  danger: 'border-rose-900/60 bg-rose-950/20 text-rose-200',
+  warn: 'border-amber-900/60 bg-amber-950/20 text-amber-200',
+  good: 'border-emerald-900/60 bg-emerald-950/20 text-emerald-200',
+  info: 'border-slate-700/70 bg-slate-800/30 text-slate-300',
 };
 
-// NVD's reference URLs are generally well-formed, but this project has
-// already hit one case (WHOIS/RDAP) of trusting a third-party API's data
-// shape too much - defensive here costs nothing and avoids a crash if a
-// reference URL is ever malformed.
 function safeHostname(url) {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
+  try { return new URL(url).hostname; } catch { return url; }
 }
 
 export default function CveCard({ cve }) {
   const summary = buildCveSummary(cve);
   const publishedDate = cve.published ? new Date(cve.published).toLocaleDateString() : 'Unknown';
-
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-5">
-      <div className="flex items-start justify-between gap-4 mb-3">
+    <article className="feed-card">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 className="font-mono font-bold text-emerald-400">{cve.id}</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Published {publishedDate}</p>
+          <h2 className="m-0 font-mono text-[15px] font-bold tracking-tight text-[#b7d8a4]">{cve.id}</h2>
+          <p className="mt-1 text-[10px] text-slate-500">Published {publishedDate}</p>
         </div>
-        <span className={`text-xs font-bold px-2 py-1 rounded border shrink-0 ${SEVERITY_STYLE[cve.severity] || SEVERITY_STYLE.UNKNOWN}`}>
-          {cve.severity}{cve.baseScore != null ? ` \u00b7 ${cve.baseScore}` : ''}
+        <span className={`rounded border px-2 py-1 font-mono text-[10px] font-bold tracking-wide ${SEVERITY_STYLE[cve.severity] || SEVERITY_STYLE.UNKNOWN}`}>
+          {cve.severity}{cve.baseScore != null ? ` · ${cve.baseScore}` : ''}
         </span>
       </div>
-
-      <div className={`text-sm p-3 rounded border mb-3 ${SUMMARY_STYLE[summary.severity]}`}>
-        {summary.text}
-      </div>
-
-      <p className="text-sm text-slate-300 mb-3">{cve.description}</p>
-
-      {cve.references?.length > 0 && (
-        <div className="flex flex-wrap gap-3">
-          {cve.references.slice(0, 3).map((url) => (
-            <a
-              key={url}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-slate-500 hover:text-emerald-400 flex items-center gap-1 transition-colors"
-            >
-              <ExternalLink size={11} /> {safeHostname(url)}
-            </a>
-          ))}
-        </div>
-      )}
-    </div>
+      <div className={`mt-4 rounded-md border px-3.5 py-3 text-[11px] leading-relaxed ${SUMMARY_STYLE[summary.severity]}`}>{summary.text}</div>
+      <p className="mb-0 mt-4 text-[12px] leading-[1.75] text-slate-300">{cve.description}</p>
+      {cve.references?.length > 0 && <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-white/[.06] pt-3">{cve.references.slice(0, 3).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[10px] text-slate-500 transition-colors hover:text-[#b7d8a4]"><ExternalLink size={11} />{safeHostname(url)}</a>)}</div>}
+    </article>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Loader2, AlertTriangle, Flame } from 'lucide-react';
+import { AlertTriangle, Flame, Loader2, Radio } from 'lucide-react';
 import NewsCard from '../components/infos/NewsCard';
 import { filterArticles } from '../utils/filterArticles';
 
@@ -20,9 +20,7 @@ export default function Infos() {
   useEffect(() => {
     const controller = new AbortController();
     abortRef.current = controller;
-
-    axios
-      .get(`${API_URL}/api/infos/feed`, { signal: controller.signal, timeout: 15000 })
+    axios.get(`${API_URL}/api/infos/feed`, { signal: controller.signal, timeout: 15000 })
       .then((res) => {
         setArticles(res.data.results);
         setFailedSources(res.data.failedSources || []);
@@ -33,85 +31,51 @@ export default function Infos() {
         setError(err.response?.data?.error || 'Failed to load the news feed.');
       })
       .finally(() => setLoading(false));
-
     return () => controller.abort();
   }, []);
 
   const filtered = filterArticles(articles, { category, notableOnly });
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-emerald-400">Infos</h1>
-        <p className="text-slate-400">Cybersecurity news, aggregated and auto-categorized from 5 trusted sources</p>
+    <div className="page-wrap">
+      <header className="page-heading">
+        <div>
+          <p className="page-kicker"><Radio size={13} /> Threat intelligence / Briefing</p>
+          <h1 className="page-title">Infos</h1>
+          <p className="page-description">Cybersecurity reporting gathered from trusted sources and organized around the stories that matter.</p>
+        </div>
+        <div className="page-aside">MULTI-SOURCE FEED<br />CATEGORIZED FOR REVIEW</div>
       </header>
 
       {!loading && articles && (
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <button
-            onClick={() => setCategory(null)}
-            className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors ${
-              !category ? 'bg-emerald-700 border-emerald-600 text-white' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
-            }`}
-          >
-            All
-          </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategory(category === cat ? null : cat)}
-              className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors ${
-                category === cat ? 'bg-emerald-700 border-emerald-600 text-white' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
-              }`}
-            >
-              {cat}
+        <section className="filter-panel" aria-label="Filter news articles">
+          <p className="filter-label">Filter by topic</p>
+          <div className="filter-row">
+            <button aria-pressed={!category} onClick={() => setCategory(null)} className={`filter-chip${!category ? ' is-selected' : ''}`}>All topics</button>
+            {CATEGORIES.map((cat) => (
+              <button key={cat} aria-pressed={category === cat} onClick={() => setCategory(category === cat ? null : cat)} className={`filter-chip${category === cat ? ' is-selected' : ''}`}>{cat}</button>
+            ))}
+            <button aria-pressed={notableOnly} onClick={() => setNotableOnly((v) => !v)} className={`filter-chip filter-chip-notable${notableOnly ? ' is-selected' : ''}`}>
+              <Flame size={12} /> Notable only
             </button>
-          ))}
-          <button
-            onClick={() => setNotableOnly((v) => !v)}
-            className={`text-xs font-bold px-3 py-1.5 rounded-full border flex items-center gap-1 transition-colors ${
-              notableOnly ? 'bg-amber-700 border-amber-600 text-white' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
-            }`}
-          >
-            <Flame size={12} /> Notable only
-          </button>
-        </div>
+          </div>
+        </section>
       )}
 
-      {loading && (
-        <div className="flex items-center gap-2 text-slate-400 py-8 justify-center">
-          <Loader2 className="animate-spin" size={18} /> Loading...
-        </div>
-      )}
-
-      {error && !loading && (
-        <div className="flex items-start gap-3 text-red-400 bg-red-900/20 p-4 border border-red-900 rounded mb-6">
-          <AlertTriangle size={18} className="shrink-0 mt-0.5" />
-          <p>{error}</p>
-        </div>
-      )}
+      {loading && <div className="state-panel" role="status"><Loader2 className="animate-spin" size={17} /> Gathering the latest reports…</div>}
+      {error && !loading && <div className="state-panel state-panel-error" role="alert"><AlertTriangle size={18} className="shrink-0" /><p>{error}</p></div>}
 
       {articles && !loading && !error && (
         <>
-          <div className="flex items-center justify-between mb-4 text-sm text-slate-500">
-            <span>{filtered.length} article{filtered.length === 1 ? '' : 's'}</span>
-            {cached && <span className="text-xs border border-slate-700 rounded px-2 py-0.5">from cache</span>}
+          <div className="result-bar">
+            <span className="result-count"><strong>{filtered.length}</strong> {filtered.length === 1 ? 'story' : 'stories'} in this view</span>
+            {cached && <span className="meta-badge">Cached feed</span>}
           </div>
-
-          {failedSources.length > 0 && (
-            <p className="text-xs text-slate-600 mb-4">
-              Note: {failedSources.map((f) => f.source).join(', ')} {failedSources.length === 1 ? 'was' : 'were'} unavailable this refresh.
-            </p>
-          )}
-
+          {failedSources.length > 0 && <p className="mb-4 text-[11px] leading-relaxed text-slate-500">Some sources could not be reached: {failedSources.map((f) => f.source).join(', ')}.</p>}
           {filtered.length === 0 ? (
-            <p className="text-slate-500 text-center py-8">No articles match this filter.</p>
+            <div className="state-panel state-panel-empty">No stories match these filters. Adjust the topic or notable-only selection.</div>
           ) : (
-            <div className="space-y-4">
-              {filtered.map((article, i) => (
-                <NewsCard key={article.link || i} article={article} />
-              ))}
-            </div>
+            <div className="feed-list">{filtered.map((article, i) => <NewsCard key={article.link || i} article={article} />)}</div>
           )}
         </>
       )}
