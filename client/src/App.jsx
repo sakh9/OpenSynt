@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Hub from './pages/Hub';
 import OsinQuest from './pages/OsinQuest';
 import RavenEyes from './pages/RavenEyes';
+import Infos from './pages/Infos';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
             <Route path="/" element={<Hub />} />
             <Route path="/osinquest" element={<OsinQuest />} />
             <Route path="/raven-eyes" element={<RavenEyes />} />
+            <Route path="/infos" element={<Infos />} />
           </Route>
         </Routes>
       </BrowserRouter>

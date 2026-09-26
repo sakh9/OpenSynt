@@ -10,7 +10,7 @@ export default function Layout() {
       {!isHub && (
         <nav className="border-b border-slate-800 px-6 py-3">
           <Link to="/" className="text-emerald-400 font-bold hover:text-emerald-300 flex items-center gap-2 w-fit transition-colors">
-            <Home size={16} /> Sakhas HQ
+            <Home size={16} /> SakhasHQ
           </Link>
         </nav>
       )}

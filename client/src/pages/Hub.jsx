@@ -7,7 +7,7 @@ import { Search, Bug, Newspaper, BookOpen } from 'lucide-react';
 const TOOLS = [
   { name: 'OsinQuest', description: 'IP & domain security intelligence lookup', icon: Search, path: '/osinquest', status: 'live' },
   { name: 'Raven Eyes', description: 'CVE tracker \u2014 recent vulnerabilities and keyword search', icon: Bug, path: '/raven-eyes', status: 'live' },
-  { name: 'InfoS', description: 'Cybersecurity news aggregator', icon: Newspaper, path: null, status: 'planned' },
+  { name: 'Infos', description: 'Cybersecurity news aggregator', icon: Newspaper, path: '/infos', status: 'live' },
   { name: 'Cybersecurity Glossary', description: 'Plain-English reference for security terms', icon: BookOpen, path: null, status: 'planned' },
 ];
 
@@ -41,7 +41,7 @@ function ToolCard({ tool }) {
 export default function Hub() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-16">
-      <h1 className="text-4xl font-bold text-center mb-2">Sakhas HQ</h1>
+      <h1 className="text-4xl font-bold text-center mb-2">SakhasHQ</h1>
       <p className="text-slate-400 text-center mb-12">A growing suite of practical, no-nonsense security tools.</p>
       <div className="grid sm:grid-cols-2 gap-6">
         {TOOLS.map((tool) =>

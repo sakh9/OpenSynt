@@ -7,7 +7,7 @@ import { filterArticles } from '../utils/filterArticles';
 const CATEGORIES = ['Ransomware', 'Data Breach', 'Vulnerability', 'Phishing', 'Malware', 'Nation-State', 'General'];
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export default function InfoS() {
+export default function Infos() {
   const [articles, setArticles] = useState(null);
   const [failedSources, setFailedSources] = useState([]);
   const [cached, setCached] = useState(false);
@@ -42,7 +42,7 @@ export default function InfoS() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-emerald-400">InfoS</h1>
+        <h1 className="text-3xl font-bold text-emerald-400">Infos</h1>
         <p className="text-slate-400">Cybersecurity news, aggregated and auto-categorized from 5 trusted sources</p>
       </header>
 
