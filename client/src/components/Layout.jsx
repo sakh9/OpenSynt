@@ -1,10 +1,8 @@
 import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
-import { Activity, Bug, Home, Newspaper, Search } from 'lucide-react';
+import { Activity, Home, Search } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { label: 'OSINQUEST', to: '/osinquest', Icon: Search },
-  { label: 'Raven Eyes', to: '/raven-eyes', Icon: Bug },
-  { label: 'Infos', to: '/infos', Icon: Newspaper },
+  { label: 'OPENSYNT', to: '/opensynt', Icon: Search },
 ];
 
 export default function Layout() {
@@ -17,7 +15,7 @@ export default function Layout() {
         <div className="site-header-inner">
           <Link to="/" className="site-brand" aria-label="SakhasHQ home">
             <span className="brand-mark"><Activity size={17} strokeWidth={2.2} /></span>
-            <span className="brand-wordmark">Sakhas<span>HQ</span></span>
+            <span className="brand-wordmark">Open<span>Synt</span></span>
           </Link>
           <nav className="site-nav" aria-label="Main navigation">
             {NAV_ITEMS.map(({ label, to, Icon }) => (
@@ -26,15 +24,15 @@ export default function Layout() {
               </NavLink>
             ))}
           </nav>
-          <div className="site-status"><span className="status-dot" /> INTELLIGENCE SUITE</div>
+          <div className="site-status"><span className="status-dot" /> INTELLIGENCE </div>
         </div>
       </header>
       <main key={pathname} className={`route-content${isHub ? ' route-content-hub' : ''}`}>
         <Outlet />
       </main>
       <footer className="site-footer">
-        <span><Home size={13} /> SAKHASHQ</span>
-        <span>Practical security intelligence</span>
+        <span><Home size={13} /> OPENSYNT</span>
+        <span>Open Source Intelligence</span>
       </footer>
     </div>
   );

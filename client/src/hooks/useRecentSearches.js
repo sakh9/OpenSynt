@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'osint_nexus_recent_searches';
+const STORAGE_KEY = 'opensynt_nexus_recent_searches';
 const MAX_ITEMS = 8;
 
 // Pure reducer-style function, exported separately so the dedup/ordering

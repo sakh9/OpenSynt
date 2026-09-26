@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import axios from 'axios';
 import { Search, ShieldAlert, Activity, MapPin, Globe, Server, AlertTriangle, Clock, CheckCircle2, Info, Copy, Download, Check, History, Sparkles, Terminal, Database, Zap} from 'lucide-react';
-import MapView from '../components/osint/MapView';
-import AbuseGauge from '../components/osint/AbuseGauge';
-import ActivityChart from '../components/osint/ActivityChart';
-import DnsRecordChart from '../components/osint/DnsRecordChart';
-import SearchChips from '../components/osint/SearchChips';
-import TotalLookupsCounter from '../components/osint/TotalLookupsCounter';
+import MapView from '../components/opensynt/MapView';
+import AbuseGauge from '../components/opensynt/AbuseGauge';
+import ActivityChart from '../components/opensynt/ActivityChart';
+import DnsRecordChart from '../components/opensynt/DnsRecordChart';
+import SearchChips from '../components/opensynt/SearchChips';
+import TotalLookupsCounter from '../components/opensynt/TotalLookupsCounter';
 import { useRecentSearches } from '../hooks/useRecentSearches';
 
 const EXAMPLE_QUERIES = ['8.8.8.8', '1.1.1.1', 'github.com', 'cloudflare.com'];
@@ -189,13 +189,13 @@ export default function Home() {
   const summaryStyle = riskSummary ? SUMMARY_STYLES[riskSummary.severity] : null;
 
   return (
-    <div className="page-wrap osint-page">
-      <div className="osint-content space-y-7">
+    <div className="page-wrap opensynt-page">
+      <div className="opensynt-content space-y-7">
         
         {/* Command Center Header */}
-        <header className="osint-heading flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
+        <header className="opensynt-heading flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="osint-mark">
+            <div className="opensynt-mark">
               <ShieldAlert size={22} />
             </div>
             <div>
@@ -207,7 +207,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <TotalLookupsCounter />
-            <div className="osint-live">
+            <div className="opensynt-live">
               <span className="status-dot" />
               <span>LOOKUP SERVICE</span>
             </div>
@@ -215,14 +215,14 @@ export default function Home() {
         </header>
 
         {/* Activity Analytics Panel */}
-        <div className="osint-activity">
+        <div className="opensynt-activity">
           <ActivityChart />
         </div>
 
         {/* Tactical Search Console */}
-        <div className="osint-search-wrap">
-          <form onSubmit={handleSearch} className="osint-search-form">
-            <div className="osint-search-icon">
+        <div className="opensynt-search-wrap">
+          <form onSubmit={handleSearch} className="opensynt-search-form">
+            <div className="opensynt-search-icon">
               <Terminal size={17} />
             </div>
             <input
@@ -231,13 +231,13 @@ export default function Home() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Enter IP (e.g. 8.8.8.8) or Domain (e.g. github.com)"
               aria-label="IP address or domain to look up"
-              className="osint-search-input"
+              className="opensynt-search-input"
             />
             <button
               type="submit"
               disabled={loading}
               aria-label={loading ? 'Searching' : 'Search'}
-              className="suite-button osint-submit"
+              className="suite-button opensynt-submit"
             >
               {loading ? (
                   <Activity className="animate-spin" size={16} />
