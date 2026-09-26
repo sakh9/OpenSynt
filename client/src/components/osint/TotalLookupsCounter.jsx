@@ -26,7 +26,7 @@ export default function TotalLookupsCounter() {
   if (total === null) return null;
 
   return (
-    <p className="text-xs text-slate-600 text-center mt-1">
+    <p className="lookup-count">
       {total.toLocaleString()} lookup{total === 1 ? '' : 's'} performed since launch
     </p>
   );

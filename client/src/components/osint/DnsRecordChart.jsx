@@ -4,12 +4,12 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 
 // and could be reused for the badge lists too if you want to color-code
 // those later. Picked to be visually distinct against the dark theme.
 const RECORD_COLORS = {
-  A: '#34d399',
-  AAAA: '#22d3ee',
-  MX: '#a78bfa',
-  NS: '#60a5fa',
-  CNAME: '#f472b6',
-  TXT: '#fbbf24',
+  A: '#b7d8a4',
+  AAAA: '#b7d8a4',
+  MX: '#b7d8a4',
+  NS: '#b7d8a4',
+  CNAME: '#b7d8a4',
+  TXT: '#b7d8a4',
 };
 
 // Exported separately so this can be unit-tested without rendering a

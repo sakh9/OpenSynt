@@ -95,10 +95,10 @@ function buildRiskSummary({ geo, shodan, abuse, type }) {
 }
 
 const SUMMARY_STYLES = {
-  good: { className: 'border-emerald-500/30 bg-emerald-950/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.08)]', Icon: CheckCircle2 },
-  warn: { className: 'border-amber-500/30 bg-amber-950/20 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.08)]', Icon: AlertTriangle },
+  good: { className: 'border-emerald-500/30 bg-emerald-950/20 text-emerald-300', Icon: CheckCircle2 },
+  warn: { className: 'border-amber-500/30 bg-amber-950/20 text-amber-300', Icon: AlertTriangle },
   danger: { className: 'border-rose-500/30 bg-rose-950/20 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.08)]', Icon: ShieldAlert },
-  info: { className: 'border-cyan-500/30 bg-cyan-950/20 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.08)]', Icon: Info },
+  info: { className: 'border-slate-700 bg-slate-900 text-slate-300', Icon: Info },
 };
 
 export default function Home() {
@@ -189,42 +189,41 @@ export default function Home() {
   const summaryStyle = riskSummary ? SUMMARY_STYLES[riskSummary.severity] : null;
 
   return (
-    <div className="min-h-screen bg-[#050811] text-slate-200 p-4 sm:p-8 font-mono selection:bg-cyan-500/30 selection:text-cyan-200">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="page-wrap osint-page">
+      <div className="osint-content space-y-7">
         
         {/* Command Center Header */}
-        <header className="flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
+        <header className="osint-heading flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-              <ShieldAlert size={32} />
+            <div className="osint-mark">
+              <ShieldAlert size={22} />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 tracking-wider">
-                OSINQUEST
-              </h1>
-              <p className="text-xs text-slate-400 font-sans">IP & Domain Intelligence Aggregator</p>
+              <p className="page-kicker"><Search size={13} /> Infrastructure intelligence / Lookup</p>
+              <h1 className="page-title">OSINQUEST</h1>
+              <p className="page-description">Investigate an IP address or domain across location, registry, DNS, exposure and abuse data.</p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <TotalLookupsCounter />
-            <div className="flex items-center gap-2 text-xs font-sans text-slate-400 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>LIVE RECON ENGINE</span>
+            <div className="osint-live">
+              <span className="status-dot" />
+              <span>LOOKUP SERVICE</span>
             </div>
           </div>
         </header>
 
         {/* Activity Analytics Panel */}
-        <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 sm:p-6 backdrop-blur-md">
+        <div className="osint-activity">
           <ActivityChart />
         </div>
 
         {/* Tactical Search Console */}
-        <div className="relative max-w-3xl mx-auto">
-          <form onSubmit={handleSearch} className="relative flex items-center">
-            <div className="absolute left-4 text-cyan-500/70">
-              <Terminal size={18} />
+        <div className="osint-search-wrap">
+          <form onSubmit={handleSearch} className="osint-search-form">
+            <div className="osint-search-icon">
+              <Terminal size={17} />
             </div>
             <input
               type="text"
@@ -232,20 +231,20 @@ export default function Home() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Enter IP (e.g. 8.8.8.8) or Domain (e.g. github.com)"
               aria-label="IP address or domain to look up"
-              className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl pl-11 pr-32 py-4 text-base sm:text-lg text-slate-100 placeholder:text-slate-600 focus:border-cyan-500/60 focus:outline-none focus:ring-4 focus:ring-cyan-500/10 transition-all shadow-xl"
+              className="osint-search-input"
             />
             <button
               type="submit"
               disabled={loading}
               aria-label={loading ? 'Searching' : 'Search'}
-              className="absolute right-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition-all disabled:opacity-50 cursor-pointer flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]"
+              className="suite-button osint-submit"
             >
               {loading ? (
-                <Activity className="animate-spin text-slate-950" size={18} />
+                  <Activity className="animate-spin" size={16} />
               ) : (
                 <>
-                  <Search size={18} />
-                  <span className="hidden sm:inline font-sans text-xs tracking-wider uppercase font-extrabold">Scan</span>
+                  <Search size={16} />
+                  <span>Scan</span>
                 </>
               )}
             </button>
