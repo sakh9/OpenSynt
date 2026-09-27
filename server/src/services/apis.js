@@ -40,6 +40,7 @@ const getGeo = async (ip) => {
         return {
           isp: data.isp,
           org: data.org || data.as,
+          asn: data.as?.match(/AS\d+/)?.[0] || null,
           city: data.city,
           country: data.country,
           lat: data.lat,
@@ -60,6 +61,7 @@ const getGeo = async (ip) => {
         return {
           isp: fbData.connection?.isp || 'Unknown',
           org: fbData.connection?.org || fbData.connection?.asn,
+          asn: fbData.connection?.asn ? `AS${fbData.connection.asn}` : null,
           city: fbData.city,
           country: fbData.country,
           lat: fbData.latitude,

@@ -45,5 +45,17 @@ export function buildFindings(data) {
   }
   const shodan = data.shodan_data;
   if (usable(shodan) && shodan.ports?.length) add({ title: 'Internet-exposed ports observed', category: 'exposure', severity: 'INFO', summary: `Shodan InternetDB lists ${shodan.ports.length} exposed port${shodan.ports.length === 1 ? '' : 's'}. Open ports indicate reachable services, not vulnerabilities.`, evidence: shodan.ports.map((value) => evidence('Shodan InternetDB', 'port', value, 'Port listed as open')), limitations: 'InternetDB observations may be stale or incomplete. An open port is not evidence of a vulnerability.' });
+  for (const relationship of data.relationships || []) {
+    const shared = relationship.type === 'shared_ip' || relationship.type === 'shared_nameserver';
+    add({
+      title: shared ? 'Potential shared infrastructure' : 'Infrastructure relationship observed',
+      category: 'relationship', severity: 'INFO', confidence: relationship.confidence,
+      summary: shared
+        ? `${relationship.sourceEntity} and ${relationship.targetEntity} show infrastructure overlap. This does not establish common ownership.`
+        : `${relationship.sourceEntity} ${relationship.type.replaceAll('_', ' ')} ${relationship.targetEntity}.`,
+      evidence: (relationship.evidence || []).map((item) => ({ source: item.source, type: relationship.type, value: `${relationship.sourceEntity} → ${relationship.targetEntity}`, description: item.description, observedAt: item.observedAt || observedAt })),
+      limitations: shared ? 'Shared infrastructure does not establish common ownership, control, or malicious activity.' : 'This observed relationship may change over time and does not establish ownership or control.',
+    });
+  }
   return findings;
 }

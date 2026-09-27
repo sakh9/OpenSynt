@@ -6,6 +6,7 @@ const pool = require('../db/pool');
 const { getGeo, getShodan, getWhois, getDns } = require('../services/apis');
 const { getAbuse } = require('../services/abuse');
 const { classifyQuery } = require('../utils/validate');
+const { buildRelationships } = require('../services/relationships');
 
 const CACHE_TTL_HOURS = Number(process.env.LOOKUP_CACHE_TTL_HOURS) || 24;
 
@@ -160,7 +161,21 @@ router.post('/', async (req, res) => {
         .catch((err) => console.error('Failed to log search history:', err.message));
     }
 
-    return res.json({ cached: fromCache, ...resultData });
+    const responseData = { cached: fromCache, ...resultData };
+    let relatedDomains = [];
+    if (responseData.query_type === 'domain') {
+      try {
+        const related = await pool.query(
+          `SELECT query, dns_data, created_at FROM lookups WHERE query_type = 'domain' AND query <> $1 AND created_at > NOW() - INTERVAL '30 days'`,
+          [responseData.query]
+        );
+        relatedDomains = related.rows;
+      } catch (err) {
+        console.warn('Could not compare cached DNS records for infrastructure overlap:', err.message);
+      }
+    }
+    responseData.relationships = buildRelationships(responseData, relatedDomains);
+    return res.json(responseData);
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ error: 'Invalid request: query is required' });

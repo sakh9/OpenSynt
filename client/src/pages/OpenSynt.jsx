@@ -171,6 +171,7 @@ export default function Home() {
   const abuse = data?.abuse_data;
   const isReverseDns = dnsData && Array.isArray(dnsData.ptr);
   const findings = data ? buildFindings(data) : [];
+  const relationships = data?.relationships || [];
   const riskSummary = data ? buildRiskSummary({ geo, shodan, findings, type: data.query_type }) : null;
   const summaryStyle = riskSummary ? SUMMARY_STYLES[riskSummary.severity] : null;
 
@@ -334,6 +335,32 @@ export default function Home() {
                       <p className="text-xs text-slate-400 mt-4"><span className="font-semibold text-slate-300">Limitation:</span> {finding.limitations}</p>
                     </article>
                   ))}
+                </div>
+              )}
+            </section>
+
+            <section className="space-y-4" aria-labelledby="relationships-heading">
+              <div className="border-b border-slate-800/80 pb-3">
+                <h2 id="relationships-heading" className="text-lg font-bold text-cyan-400">Infrastructure Relationships</h2>
+                <p className="text-xs text-slate-500 mt-1">Relationships describe observed infrastructure links, not shared ownership.</p>
+              </div>
+              {relationships.length === 0 ? <p className="text-sm text-slate-500">No supported infrastructure relationships were found in the available data.</p> : (
+                <div className="space-y-3">
+                  {relationships.map((relationship, index) => {
+                    const shared = relationship.type === 'shared_ip' || relationship.type === 'shared_nameserver';
+                    const label = ({ resolves_to: 'resolves to', uses_nameserver: 'uses nameserver', announced_by_asn: 'associated with ASN', shared_ip: 'shares IP infrastructure with', shared_nameserver: 'shares nameserver infrastructure with' })[relationship.type] || relationship.type.replaceAll('_', ' ');
+                    return <article key={`${relationship.type}-${relationship.sourceEntity}-${relationship.targetEntity}-${index}`} className="bg-slate-900/40 border border-slate-800/80 p-4 rounded-xl">
+                      <div className="flex flex-wrap items-center gap-2 text-sm">
+                        <span className="font-mono text-slate-100 break-all">{relationship.sourceEntity}</span>
+                        <span className="text-cyan-300">↓ {label} {shared ? '↔' : '↓'}</span>
+                        <span className="font-mono text-slate-100 break-all">{relationship.targetEntity}</span>
+                        <span className="ml-auto text-xs text-slate-400">Confidence {(relationship.confidence * 100).toFixed(0)}%</span>
+                      </div>
+                      <p className="text-xs text-slate-300 mt-3">Why: {relationship.evidence?.map((item) => item.description).join('; ')}</p>
+                      <p className="text-[11px] text-slate-500 mt-2">Source: {relationship.evidence?.map((item) => item.source).filter((source, i, all) => all.indexOf(source) === i).join(', ')} · Observed: {relationship.evidence?.map((item) => item.observedAt ? new Date(item.observedAt).toLocaleString() : null).filter(Boolean).join(', ') || 'Lookup time'}</p>
+                      {shared && <p className="text-xs text-slate-400 mt-2">Limitation: Infrastructure overlap does not establish common ownership.</p>}
+                    </article>;
+                  })}
                 </div>
               )}
             </section>
