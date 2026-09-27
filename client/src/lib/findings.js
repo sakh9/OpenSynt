@@ -1,3 +1,5 @@
+import { buildTimeline } from './timeline';
+
 const usable = (value) => value && !value.error && !value.skipped;
 
 function evidence(source, type, value, description, observedAt) {
@@ -6,13 +8,13 @@ function evidence(source, type, value, description, observedAt) {
 
 export function buildFindings(data) {
   if (!data) return [];
-  const observedAt = data.created_at || new Date().toISOString();
+  const observedAt = data.created_at || null;
   const findings = [];
   const add = (finding) => findings.push({
     id: `${finding.category}-${findings.length + 1}`,
     confidence: 0.9,
     ...finding,
-    evidence: finding.evidence.map((item) => ({ ...item, observedAt: item.observedAt || observedAt })),
+    evidence: finding.evidence.map((item) => ({ ...item, observedAt: item.observedAt ?? observedAt })),
   });
   const abuse = data.abuse_data;
   if (usable(abuse) && Number.isFinite(Number(abuse.abuseConfidenceScore)) && abuse.abuseConfidenceScore != null) {
@@ -53,9 +55,17 @@ export function buildFindings(data) {
       summary: shared
         ? `${relationship.sourceEntity} and ${relationship.targetEntity} show infrastructure overlap. This does not establish common ownership.`
         : `${relationship.sourceEntity} ${relationship.type.replaceAll('_', ' ')} ${relationship.targetEntity}.`,
-      evidence: (relationship.evidence || []).map((item) => ({ source: item.source, type: relationship.type, value: `${relationship.sourceEntity} → ${relationship.targetEntity}`, description: item.description, observedAt: item.observedAt || observedAt })),
+      evidence: (relationship.evidence || []).map((item) => ({ source: item.source, type: relationship.type, value: `${relationship.sourceEntity} → ${relationship.targetEntity}`, description: item.description, observedAt: item.observedAt ?? observedAt })),
       limitations: shared ? 'Shared infrastructure does not establish common ownership, control, or malicious activity.' : 'This observed relationship may change over time and does not establish ownership or control.',
     });
   }
+  const { changes } = buildTimeline(data.observations || [data]);
+  for (const change of changes) add({
+    title: change.type === 'new_service' ? 'New exposed service observed' : change.type === 'nameserver_change' ? 'Nameserver change observed' : 'DNS infrastructure changed',
+    category: 'temporal', severity: 'INFO', confidence: 0.95,
+    summary: change.description,
+    evidence: change.evidence.map((item) => ({ source: item.source, type: change.type, value: item.description, description: item.description, observedAt: item.observedAt ?? observedAt })),
+    limitations: 'This records different OpenSynt observations and does not establish why the change occurred.',
+  });
   return findings;
 }

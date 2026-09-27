@@ -13,7 +13,7 @@ export default function Layout() {
     <div className="site-shell min-h-screen bg-slate-950 text-slate-100">
       <header className="site-header">
         <div className="site-header-inner">
-          <Link to="/" className="site-brand" aria-label="SakhasHQ home">
+          <Link to="/" className="site-brand" aria-label="OpenSynt Home">
             <span className="brand-mark"><Activity size={17} strokeWidth={2.2} /></span>
             <span className="brand-wordmark">Open<span>Synt</span></span>
           </Link>

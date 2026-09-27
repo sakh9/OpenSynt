@@ -21,6 +21,13 @@ function buildRelationships(data, otherDomains = []) {
       }
     }
   }
+  if (data.query_type === 'ip') {
+    for (const domain of otherDomains) {
+      if ([...(domain.dns_data?.A || []), ...(domain.dns_data?.AAAA || [])].includes(query)) {
+        relationships.push({ type: 'resolves_to', sourceEntity: domain.query, targetEntity: query, confidence: 0.85, evidence: [{ source: 'DNS', description: `${domain.query} was observed resolving to ${query}`, observedAt: domain.created_at || observedAt }] });
+      }
+    }
+  }
   const ip = data.query_type === 'ip' ? query : data.geo_data?.resolvedIp;
   const asn = data.geo_data?.asn || data.geo_data?.as;
   if (ip && asn) relationships.push({ type: 'announced_by_asn', sourceEntity: ip, targetEntity: String(asn).startsWith('AS') ? String(asn) : `AS${asn}`, confidence: 0.8, evidence: [{ source: 'Geolocation provider', description: `${ip} is associated with ASN ${asn} in the geolocation response`, observedAt }] });

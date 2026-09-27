@@ -9,6 +9,8 @@ import SearchChips from '../components/opensynt/SearchChips';
 import TotalLookupsCounter from '../components/opensynt/TotalLookupsCounter';
 import { useRecentSearches } from '../hooks/useRecentSearches';
 import { buildFindings } from '../lib/findings';
+import InvestigationGraph from '../components/opensynt/InvestigationGraph';
+import InfrastructureTimeline from '../components/opensynt/InfrastructureTimeline';
 
 const EXAMPLE_QUERIES = ['8.8.8.8', '1.1.1.1', 'github.com', 'cloudflare.com'];
 
@@ -182,9 +184,6 @@ export default function Home() {
         {/* Command Center Header */}
         <header className="opensynt-heading flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="opensynt-mark">
-              <ShieldAlert size={22} />
-            </div>
             <div>
               <p className="page-kicker"><Search size={13} /> Infrastructure Lookup</p>
               <h1 className="page-title">OpenSynt</h1>
@@ -330,7 +329,7 @@ export default function Home() {
                       <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-4 mb-2">Evidence</h4>
                       <ul className="space-y-2">{finding.evidence.map((item, index) => <li key={`${item.type}-${index}`} className="text-xs bg-slate-950/50 rounded-lg p-2.5">
                         <div className="text-slate-200">{item.description}: <span className="font-mono break-all">{String(item.value)}</span></div>
-                        <div className="text-slate-500 mt-1">Source: {item.source} · Observed: {new Date(item.observedAt).toLocaleString()}</div>
+                        <div className="text-slate-500 mt-1">Source: {item.source} · Observed: {item.observedAt ? new Date(item.observedAt).toLocaleString() : 'Timestamp unavailable'}</div>
                       </li>)}</ul>
                       <p className="text-xs text-slate-400 mt-4"><span className="font-semibold text-slate-300">Limitation:</span> {finding.limitations}</p>
                     </article>
@@ -363,6 +362,16 @@ export default function Home() {
                   })}
                 </div>
               )}
+            </section>
+
+            <section className="space-y-4" aria-labelledby="graph-heading">
+              <div className="border-b border-slate-800/80 pb-3"><h2 id="graph-heading" className="text-lg font-bold text-cyan-400">Investigation Graph</h2><p className="text-xs text-slate-500 mt-1">Direct relationships only · select a node or edge to inspect evidence · scroll to zoom and drag to pan.</p></div>
+              {relationships.length ? <InvestigationGraph relationships={relationships} rootValue={data.query} onPivot={(value) => handleSearch(undefined, value)} /> : <p className="text-sm text-slate-500">No relationships are available to graph.</p>}
+            </section>
+
+            <section className="space-y-4" aria-labelledby="timeline-heading">
+              <div className="border-b border-slate-800/80 pb-3"><h2 id="timeline-heading" className="text-lg font-bold text-cyan-400">Infrastructure Timeline</h2><p className="text-xs text-slate-500 mt-1">Source observations stored by OpenSynt. Dates are observation times, not inferred creation dates.</p></div>
+              <InfrastructureTimeline observations={data.observations?.length ? data.observations : [data]} />
             </section>
 
             {/* Main Bento Cards Grid */}

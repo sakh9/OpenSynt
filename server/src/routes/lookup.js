@@ -162,17 +162,25 @@ router.post('/', async (req, res) => {
     }
 
     const responseData = { cached: fromCache, ...resultData };
+    try {
+      const history = await pool.query(
+        `SELECT query, query_type, geo_data, whois_data, dns_data, shodan_data, abuse_data, created_at FROM lookups WHERE query = $1 ORDER BY created_at ASC`,
+        [responseData.query]
+      );
+      responseData.observations = history.rows;
+    } catch (err) {
+      console.warn('Could not load lookup observations for timeline:', err.message);
+      responseData.observations = [responseData];
+    }
     let relatedDomains = [];
-    if (responseData.query_type === 'domain') {
-      try {
-        const related = await pool.query(
-          `SELECT query, dns_data, created_at FROM lookups WHERE query_type = 'domain' AND query <> $1 AND created_at > NOW() - INTERVAL '30 days'`,
-          [responseData.query]
-        );
-        relatedDomains = related.rows;
-      } catch (err) {
-        console.warn('Could not compare cached DNS records for infrastructure overlap:', err.message);
-      }
+    try {
+      const related = await pool.query(
+        `SELECT query, dns_data, created_at FROM lookups WHERE query_type = 'domain' AND query <> $1 AND created_at > NOW() - INTERVAL '30 days'`,
+        [responseData.query]
+      );
+      relatedDomains = related.rows;
+    } catch (err) {
+      console.warn('Could not compare cached DNS records for infrastructure overlap:', err.message);
     }
     responseData.relationships = buildRelationships(responseData, relatedDomains);
     return res.json(responseData);
