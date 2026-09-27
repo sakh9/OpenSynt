@@ -199,8 +199,8 @@ export default function Home() {
               <ShieldAlert size={22} />
             </div>
             <div>
-              <p className="page-kicker"><Search size={13} /> Infrastructure intelligence / Lookup</p>
-              <h1 className="page-title">OSINQUEST</h1>
+              <p className="page-kicker"><Search size={13} /> Infrastructure Lookup</p>
+              <h1 className="page-title">OpenSynt</h1>
               <p className="page-description">Investigate an IP address or domain across location, registry, DNS, exposure and abuse data.</p>
             </div>
           </div>
