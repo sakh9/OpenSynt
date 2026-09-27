@@ -8,6 +8,7 @@ import DnsRecordChart from '../components/opensynt/DnsRecordChart';
 import SearchChips from '../components/opensynt/SearchChips';
 import TotalLookupsCounter from '../components/opensynt/TotalLookupsCounter';
 import { useRecentSearches } from '../hooks/useRecentSearches';
+import { buildFindings } from '../lib/findings';
 
 const EXAMPLE_QUERIES = ['8.8.8.8', '1.1.1.1', 'github.com', 'cloudflare.com'];
 
@@ -38,7 +39,7 @@ function SourceStatus({ error, skipped, reason }) {
   return null;
 }
 
-function buildRiskSummary({ geo, shodan, abuse, type }) {
+function buildRiskSummary({ geo, shodan, findings, type }) {
   const parts = [];
   const subject = type === 'domain' ? 'This domain' : 'This IP';
   let severity = 'info';
@@ -68,26 +69,10 @@ function buildRiskSummary({ geo, shodan, abuse, type }) {
     }
   }
 
-  if (abuse && !abuse.error && !abuse.skipped) {
-    const score = abuse.abuseConfidenceScore ?? 0;
-    const reports = abuse.totalReports ?? 0;
-    if (score === 0 && reports === 0) {
-      parts.push('No abuse reports on file — appears clean.');
-      severity = 'good';
-    } else if (score < 25) {
-      parts.push(`Low abuse risk (${score}% confidence from ${reports} report${reports === 1 ? '' : 's'}).`);
-      severity = 'good';
-    } else if (score < 75) {
-      parts.push(`Moderate abuse risk — ${score}% confidence from ${reports} reports. Worth a closer look.`);
-      severity = 'warn';
-    } else {
-      parts.push(`High abuse risk — ${score}% confidence from ${reports} reports. Treat with caution.`);
-      severity = 'danger';
-    }
-    if (abuse.isTor) {
-      parts.push('It is a known Tor exit node.');
-      if (severity !== 'danger') severity = 'warn';
-    }
+  const abuseFinding = findings.find((finding) => finding.category === 'reputation');
+  if (abuseFinding) {
+    parts.push(abuseFinding.summary);
+    severity = abuseFinding.severity === 'HIGH' ? 'danger' : abuseFinding.severity === 'MEDIUM' ? 'warn' : 'good';
   }
 
   if (parts.length === 0) return null;
@@ -185,7 +170,8 @@ export default function Home() {
   const dnsData = data?.dns_data;
   const abuse = data?.abuse_data;
   const isReverseDns = dnsData && Array.isArray(dnsData.ptr);
-  const riskSummary = data ? buildRiskSummary({ geo, shodan, whois, abuse, type: data.query_type }) : null;
+  const findings = data ? buildFindings(data) : [];
+  const riskSummary = data ? buildRiskSummary({ geo, shodan, findings, type: data.query_type }) : null;
   const summaryStyle = riskSummary ? SUMMARY_STYLES[riskSummary.severity] : null;
 
   return (
@@ -325,6 +311,32 @@ export default function Home() {
                 <p className="font-sans text-slate-200">{riskSummary.text}</p>
               </div>
             )}
+
+            <section className="space-y-4" aria-labelledby="findings-heading">
+              <div className="border-b border-slate-800/80 pb-3">
+                <h2 id="findings-heading" className="text-lg font-bold text-cyan-400">Evidence-Based Findings</h2>
+                <p className="text-xs text-slate-500 mt-1">Confidence describes how strongly the collected evidence supports each finding; it is not a probability of malicious activity.</p>
+              </div>
+              {findings.length === 0 ? <p className="text-sm text-slate-500">No findings could be generated because the required source evidence was unavailable.</p> : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {findings.map((finding) => (
+                    <article key={finding.id} className="bg-slate-900/40 border border-slate-800/80 p-5 rounded-2xl">
+                      <div className="flex items-start justify-between gap-3">
+                        <div><span className="text-[10px] tracking-widest font-bold text-cyan-300">{finding.severity}</span><h3 className="text-base font-semibold text-slate-100 mt-1">{finding.title}</h3></div>
+                        <span className="text-xs text-slate-400 whitespace-nowrap">Confidence {(finding.confidence * 100).toFixed(0)}%</span>
+                      </div>
+                      <p className="text-sm text-slate-300 mt-3">{finding.summary}</p>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-4 mb-2">Evidence</h4>
+                      <ul className="space-y-2">{finding.evidence.map((item, index) => <li key={`${item.type}-${index}`} className="text-xs bg-slate-950/50 rounded-lg p-2.5">
+                        <div className="text-slate-200">{item.description}: <span className="font-mono break-all">{String(item.value)}</span></div>
+                        <div className="text-slate-500 mt-1">Source: {item.source} · Observed: {new Date(item.observedAt).toLocaleString()}</div>
+                      </li>)}</ul>
+                      <p className="text-xs text-slate-400 mt-4"><span className="font-semibold text-slate-300">Limitation:</span> {finding.limitations}</p>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
 
             {/* Main Bento Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
