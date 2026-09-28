@@ -28,13 +28,13 @@ export default function InvestigationGraph({ relationships, rootValue, onPivot }
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full min-h-[280px] touch-none cursor-grab" role="img" aria-label="Investigation graph. Use the mouse wheel to zoom and drag the background to pan.">
         <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
           {graph.edges.map((edge, index) => { const a = positions.get(edge.source); const b = positions.get(edge.target); const active = selectedEdge === edge; return <g key={`${edge.type}-${index}`} onClick={() => { setSelectedEdge(edge); setSelectedEntity(null); }} className="cursor-pointer">
-            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={active ? '#22d3ee' : '#475569'} strokeWidth={active ? 3 : 1.5} />
+            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={active ? '#b7d8a4' : '#59645c'} strokeWidth={active ? 3 : 1.5} />
             <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="transparent" strokeWidth="14" />
             <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 - 7} textAnchor="middle" fill="#94a3b8" fontSize="10">{edge.type.replaceAll('_', ' ')}</text>
           </g>; })}
           {graph.entities.map((entity) => { const p = positions.get(entity.id); const isRoot = entity.value.toLowerCase() === rootValue?.toLowerCase(); const active = selectedEntity?.id === entity.id; return <g key={entity.id} transform={`translate(${p.x} ${p.y})`} onClick={() => selectEntity(entity)} className="cursor-pointer">
-            <circle r="25" fill={active || isRoot ? '#164e63' : '#0f172a'} stroke={active ? '#22d3ee' : connected.has(entity.id) ? '#0891b2' : '#334155'} strokeWidth="2" />
-            <text y="4" textAnchor="middle" fill="#67e8f9" fontSize="9" fontWeight="700">{entity.type.toUpperCase()}</text>
+            <circle r="25" fill={active || isRoot ? '#344432' : '#0f172a'} stroke={active ? '#b7d8a4' : connected.has(entity.id) ? '#91b67c' : '#334155'} strokeWidth="2" />
+            <text y="4" textAnchor="middle" fill="#c3d5b9" fontSize="9" fontWeight="700">{entity.type.toUpperCase()}</text>
             <text y="43" textAnchor="middle" fill="#e2e8f0" fontSize="11">{entity.value.length > 26 ? `${entity.value.slice(0, 23)}…` : entity.value}</text>
           </g>; })}
         </g>

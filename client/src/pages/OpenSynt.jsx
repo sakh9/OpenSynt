@@ -185,9 +185,9 @@ export default function Home() {
         <header className="opensynt-heading flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
           <div className="flex items-center gap-3">
             <div>
-              <p className="page-kicker"><Search size={13} /> Infrastructure Lookup</p>
+              <p className="page-kicker"><Search size={13} /> Infrastructure Intelligence</p>
               <h1 className="page-title">OpenSynt</h1>
-              <p className="page-description">Investigate an IP address or domain across location, registry, DNS, exposure and abuse data.</p>
+              <p className="opensynt-intro">Investigate an IP address or domain using public infrastructure intelligence. Review the evidence, its source, and its limits.</p>
             </div>
           </div>
 
@@ -200,12 +200,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Activity Analytics Panel */}
-        <div className="opensynt-activity">
-          <ActivityChart />
-        </div>
-
-        {/* Tactical Search Console */}
+        {/* Investigation entry point */}
         <div className="opensynt-search-wrap">
           <form onSubmit={handleSearch} className="opensynt-search-form">
             <div className="opensynt-search-icon">
@@ -215,7 +210,7 @@ export default function Home() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter IP (e.g. 8.8.8.8) or Domain (e.g. github.com)"
+              placeholder="Enter an IP address or domain, e.g. 8.8.8.8 or example.com"
               aria-label="IP address or domain to look up"
               className="opensynt-search-input"
             />
@@ -239,14 +234,14 @@ export default function Home() {
 
         {/* Status & Loading Banners */}
         {loading && (
-          <div className="flex items-center justify-center gap-2 text-slate-400 text-xs sm:text-sm font-sans bg-slate-900/40 border border-slate-800 rounded-xl p-4 max-w-2xl mx-auto">
+          <div role="status" aria-live="polite" className="flex items-center justify-center gap-2 text-slate-400 text-xs sm:text-sm font-sans bg-slate-900/40 border border-slate-800 rounded-xl p-4 max-w-2xl mx-auto">
             <Activity className="animate-spin text-cyan-400 shrink-0" size={16} />
-            <span>Querying geolocation, WHOIS, DNS, and reputation sources...</span>
+            <span>Collecting infrastructure intelligence from configured sources…</span>
           </div>
         )}
 
         {error && (
-          <div className="text-rose-400 bg-rose-950/20 border border-rose-900/50 rounded-xl p-4 text-sm max-w-2xl mx-auto flex items-center gap-3 backdrop-blur-sm">
+          <div role="alert" className="text-rose-400 bg-rose-950/20 border border-rose-900/50 rounded-xl p-4 text-sm max-w-2xl mx-auto flex items-center gap-3 backdrop-blur-sm">
             <AlertTriangle className="shrink-0 text-rose-400" size={18} />
             <span className="font-sans">{error}</span>
           </div>
@@ -260,21 +255,23 @@ export default function Home() {
           </div>
         )}
 
+        {!data && <div className="opensynt-activity"><ActivityChart /></div>}
+
         {/* Intel Results Container */}
         {data && !loading && (
           <div className="space-y-6">
             
             {/* Intel Header Meta Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-800/80 pb-4 font-sans">
+            <div className="target-header">
               <div className="flex items-center gap-2">
-                <span className="text-slate-500">TARGET:</span>
+                <span className="target-type">TARGET</span>
                 <span className="text-slate-100 font-mono font-bold text-sm bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">{data.query}</span>
                 <span className="uppercase bg-cyan-950/50 text-cyan-300 border border-cyan-800/50 rounded-md px-2 py-0.5 text-[10px] font-bold tracking-widest">
                   {data.query_type}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="target-actions">
                 {data.cached && (
                   <div className="flex items-center gap-1.5 text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-[11px]">
                     <Database size={12} className="text-teal-400" />
@@ -286,7 +283,7 @@ export default function Home() {
                   onClick={handleCopyJson}
                   aria-label="Copy result as JSON"
                   title="Copy result as JSON"
-                  className="flex items-center gap-1.5 text-xs bg-slate-900 border border-slate-800 hover:border-cyan-500 hover:text-cyan-400 text-slate-300 rounded-lg px-3 py-1 transition-all cursor-pointer"
+                  className="target-action"
                 >
                   {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                   <span>{copied ? 'Copied' : 'Copy JSON'}</span>
@@ -296,7 +293,7 @@ export default function Home() {
                   onClick={handleDownloadJson}
                   aria-label="Download result as JSON"
                   title="Download result as JSON"
-                  className="flex items-center gap-1.5 text-xs bg-slate-900 border border-slate-800 hover:border-cyan-500 hover:text-cyan-400 text-slate-300 rounded-lg px-3 py-1 transition-all cursor-pointer"
+                  className="target-action"
                 >
                   <Download size={12} />
                   <span>Download</span>
@@ -304,6 +301,13 @@ export default function Home() {
               </div>
             </div>
 
+            <section className="target-facts" aria-label="Target overview">
+              <div className="target-fact"><span>Resolved address</span><strong className="font-mono">{geo?.resolvedIp || (data.query_type === 'ip' ? data.query : 'Not returned')}</strong></div>
+              <div className="target-fact"><span>Network</span><strong>{geo?.asn || geo?.org || geo?.isp || 'Not returned'}</strong></div>
+              <div className="target-fact"><span>Location</span><strong>{[geo?.city, geo?.country].filter(Boolean).join(', ') || 'Not returned'}</strong></div>
+              <div className="target-fact"><span>Open ports</span><strong>{shodan?.error || shodan?.skipped ? 'Unavailable' : shodan?.ports?.length ?? 'Not returned'}</strong></div>
+              <div className="target-fact"><span>Abuse confidence</span><strong>{abuse?.error || abuse?.skipped ? 'Unavailable' : abuse?.abuseConfidenceScore != null ? abuse.abuseConfidenceScore + '%' : 'Not returned'}</strong></div>
+            </section>
             {/* Synthesized Risk Summary Banner */}
             {riskSummary && summaryStyle && (
               <div className={`flex items-start gap-3 p-4 border rounded-2xl text-sm leading-relaxed backdrop-blur-md ${summaryStyle.className}`}>
@@ -317,7 +321,7 @@ export default function Home() {
                 <h2 id="findings-heading" className="text-lg font-bold text-cyan-400">Evidence-Based Findings</h2>
                 <p className="text-xs text-slate-500 mt-1">Confidence describes how strongly the collected evidence supports each finding; it is not a probability of malicious activity.</p>
               </div>
-              {findings.length === 0 ? <p className="text-sm text-slate-500">No findings could be generated because the required source evidence was unavailable.</p> : (
+              {findings.length === 0 ? <p className="intel-empty">No findings could be generated because the required source evidence was unavailable.</p> : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {findings.map((finding) => (
                     <article key={finding.id} className="bg-slate-900/40 border border-slate-800/80 p-5 rounded-2xl">
@@ -343,7 +347,7 @@ export default function Home() {
                 <h2 id="relationships-heading" className="text-lg font-bold text-cyan-400">Infrastructure Relationships</h2>
                 <p className="text-xs text-slate-500 mt-1">Relationships describe observed infrastructure links, not shared ownership.</p>
               </div>
-              {relationships.length === 0 ? <p className="text-sm text-slate-500">No supported infrastructure relationships were found in the available data.</p> : (
+              {relationships.length === 0 ? <p className="intel-empty">No supported infrastructure relationships were found in the available data.</p> : (
                 <div className="space-y-3">
                   {relationships.map((relationship, index) => {
                     const shared = relationship.type === 'shared_ip' || relationship.type === 'shared_nameserver';
@@ -366,7 +370,7 @@ export default function Home() {
 
             <section className="space-y-4" aria-labelledby="graph-heading">
               <div className="border-b border-slate-800/80 pb-3"><h2 id="graph-heading" className="text-lg font-bold text-cyan-400">Investigation Graph</h2><p className="text-xs text-slate-500 mt-1">Direct relationships only · select a node or edge to inspect evidence · scroll to zoom and drag to pan.</p></div>
-              {relationships.length ? <InvestigationGraph relationships={relationships} rootValue={data.query} onPivot={(value) => handleSearch(undefined, value)} /> : <p className="text-sm text-slate-500">No relationships are available to graph.</p>}
+              {relationships.length ? <InvestigationGraph relationships={relationships} rootValue={data.query} onPivot={(value) => handleSearch(undefined, value)} /> : <div className="graph-empty-state"><strong>No infrastructure relationships found</strong><span>There is no supported relationship data to visualize for this target.</span></div>}
             </section>
 
             <section className="space-y-4" aria-labelledby="timeline-heading">
@@ -374,8 +378,10 @@ export default function Home() {
               <InfrastructureTimeline observations={data.observations?.length ? data.observations : [data]} />
             </section>
 
-            {/* Main Bento Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <details className="source-data-disclosure">
+              <summary><span><Database size={15} /> Source data and location</span><span className="disclosure-hint">Detailed provider responses</span></summary>
+            {/* Main source data cards */}
+            <div className="source-data-grid grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* Geolocation Card */}
               {geo && (
@@ -561,6 +567,7 @@ export default function Home() {
               )}
 
             </div>
+            </details>
           </div>
         )}
       </div>
