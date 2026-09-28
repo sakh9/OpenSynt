@@ -182,16 +182,14 @@ export default function Home() {
       <div className="opensynt-content space-y-7">
         
         {/* Command Center Header */}
-        <header className="opensynt-heading flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="page-kicker"><Search size={13} /> Infrastructure Intelligence</p>
-              <h1 className="page-title">OpenSynt</h1>
-              <p className="opensynt-intro">Investigate an IP address or domain using public infrastructure intelligence. Review the evidence, its source, and its limits.</p>
-            </div>
+        <header className="opensynt-heading border-b border-slate-800/80">
+          <div className="opensynt-heading-main">
+            <p className="page-kicker"><Search size={13} /> Infrastructure Intelligence</p>
+            <h1 className="page-title">OpenSynt</h1>
+            <p className="opensynt-intro">Investigate an IP address or domain using public infrastructure intelligence. Review the evidence, its source, and its limits.</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="opensynt-heading-meta flex flex-col sm:flex-row items-center gap-3">
             <TotalLookupsCounter />
             <div className="opensynt-live">
               <span className="status-dot" />
